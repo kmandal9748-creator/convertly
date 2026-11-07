@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://YOUR-USERNAME.github.io/convertly/sitemap.xml
+Sitemap: https://kmandal9748-creator.github.io/convertly/sitemap.xml
