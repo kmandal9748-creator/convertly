@@ -33,3 +33,12 @@ canvas#sg{width:100%;height:120px;border:1px dashed var(--bd);border-radius:8px;
 .b.s{background:transparent;color:var(--tx);border:1px solid var(--bd);margin-left:8px}
 #st{margin-top:12px;font-size:13px;color:var(--mu);word-break:break-word}#st a{color:var(--ac);font-weight:700}
 footer{text-align:center;color:var(--mu);font-size:12px;padding:0 20px 30px}
+a{color:var(--ac)}a.t,a.brand{text-decoration:none;color:var(--tx)}
+body.tp #m{display:none}
+body.tp #ov{position:static;display:flex!important;background:none;backdrop-filter:none;padding:8px 20px 0;z-index:auto}
+body.tp #pn{box-shadow:none}body.tp #cl{display:none}
+.doc{max-width:760px;margin:40px auto;padding:0 22px 20px}.doc h2{font-size:20px;margin:28px 0 10px}
+.doc li,.doc p{color:var(--mu)}.doc details{border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin:8px 0;background:var(--card)}
+.doc summary{cursor:pointer;font-weight:600;color:var(--tx)}.doc details p{margin:8px 0 0}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;padding:0;list-style:none}.links a{font-size:14px}
+footer a{color:var(--mu)}
