@@ -48,8 +48,21 @@ return[{n:'archive-pdfa.pdf',b:new Blob([await d.save({useObjectStreams:false})]
 {id:'unl',c:'Security',n:'Unlock PDF',i:'🔓',a:'.pdf',d:'Open a protected PDF with its password and save an unlocked copy. Pages are re-rendered as images.',o:[{k:'pw',l:'Password',t:'password'}],run:async(fs,o)=>[{n:'unlocked.pdf',b:await raster(await open(fs[0],o.pw),2,.85)}]},
 {id:'sgn',c:'Security',n:'Sign PDF',i:'✍️',a:'.pdf',d:'Draw your signature and place it on a page.',o:[{k:'sig',t:'sign',l:'Draw your signature'},{k:'pg',l:'Page number (0 = last)',d:'0'},{k:'pos',l:'Position',t:'sel',v:[['br','Bottom right'],['bl','Bottom left'],['bc','Bottom center'],['mc','Middle']]}],run:async(fs,o)=>{if(!sgd)throw Error('Please draw a signature first.');const s=await ld(fs[0]),im=await s.embedPng($('#sg').toDataURL('image/png')),pg=s.getPage((+o.pg>0?+o.pg:s.getPageCount())-1),{width:W,height:H}=pg.getSize(),w=Math.min(180,W/3),h=w*im.height/im.width,x={l:40,c:W/2-w/2,r:W-w-40}[o.pos[1]]??W/2-w/2;pg.drawImage(im,{x:o.pos=='mc'?W/2-w/2:x,y:o.pos=='mc'?H/2-h/2:40,width:w,height:h});return[{n:'signed.pdf',b:await pb(s)}]}}
 ];
+const SV=p=>`<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`,D='<path d="M6 3h8l4 4v14H6zM14 3v4h4"/>',IC={
+p2w:D+'<path d="M9 12h6M9 16h6"/>',p2x:D+'<path d="M9 11h6v6H9zM12 11v6M9 14h6"/>',p2p:D+'<circle cx="12" cy="14" r="2.5"/>',
+p2j:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 17l5-4 4 3 3-2 4 3"/>',j2p:D+'<path d="M9 17l2-3 2 2 2-3"/>',
+pda:'<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11h14V8M10 12h4"/>',
+mrg:'<rect x="4" y="4" width="11" height="11" rx="2"/><rect x="9" y="9" width="11" height="11" rx="2"/>',
+spl:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 8l12 10M8 16L20 6"/>',
+cmp:'<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',rot:'<path d="M20 12a8 8 0 1 1-3-6.2M20 4v5h-5"/>',
+org:'<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
+rem:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',num:'<path d="M9 4L7 20M17 4l-2 16M4 9h16M4 15h16"/>',
+wm:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',crp:'<path d="M7 3v14h14M3 7h14v14"/>',
+prt:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+unl:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/>',sgn:'<path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/>'},
+ic=id=>SV(IC[id]||D);
 let cur,sgd=0;
-const m=$('#m');[...new Set(T.map(t=>t.c))].forEach(c=>{m.insertAdjacentHTML('beforeend',`<h2>${c}</h2><div class="g">${T.filter(t=>t.c==c).map(t=>`<button class="t" data-id="${t.id}"${t.x?' disabled':''}><b>${t.i}</b><span>${t.n}<small>${t.x?t.d:''}</small></span></button>`).join('')}</div>`)});
+const m=$('#m');[...new Set(T.map(t=>t.c))].forEach(c=>{m.insertAdjacentHTML('beforeend',`<h2>${c}</h2><div class="g">${T.filter(t=>t.c==c).map(t=>`<button class="t" data-id="${t.id}"${t.x?' disabled':''}><b>${ic(t.id)}</b><strong>${t.n}</strong><small>${t.d}</small></button>`).join('')}</div>`)});
 m.onclick=e=>{const b=e.target.closest('.t');if(!b)return;cur=T.find(t=>t.id==b.dataset.id);sgd=0;
 $('#pn').innerHTML=`<h3>${cur.n}</h3><p>${cur.d}</p><label>${cur.m?'Choose files':'Choose a file'}</label><input type="file" id="f" accept="${cur.a}"${cur.m?' multiple':''}>`+(cur.o||[]).map(o=>o.t=='sel'?`<label>${o.l}</label><select id="o_${o.k}">${o.v.map(v=>`<option value="${v[0]}">${v[1]}</option>`).join('')}</select>`:o.t=='sign'?`<label>${o.l}</label><canvas id="sg" width="440" height="120"></canvas>`:`<label>${o.l}</label><input id="o_${o.k}" type="${o.t||'text'}" value="${o.d||''}">`).join('')+`<button class="b" id="go">${cur.n.startsWith('PDF to')||cur.n=='JPG to PDF'?'Convert':'Run'}</button><button class="b s" id="cl">Close</button><div id="st"></div>`;
 $('#ov').style.display='flex';$('#cl').onclick=()=>$('#ov').style.display='none';
@@ -58,6 +71,7 @@ $('#go').onclick=async()=>{const fs=[...$('#f').files];if(!fs.length)return st('
 const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;a.click();st(`Done (${(b.size/1024).toFixed(0)} KB). <a href="${u}" download="${n}">Download ${n}</a>`)}catch(e){st('Could not process this file: '+(e.name=='PasswordException'?'a correct password is required.':e.message))}}};
 (()=>{const R=document.documentElement,g=k=>{try{return localStorage.getItem(k)}catch(e){}},s=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 if(g('cv-t'))R.dataset.theme=g('cv-t');if(g('cv-h'))R.style.setProperty('--h',g('cv-h'));
-$('#sw').innerHTML=[20,215,150,275].map(h=>`<button class="dot" data-h="${h}" style="background:hsl(${h} 85% 50%)" aria-label="Accent colour ${h}"></button>`).join('');
+$('#sw').innerHTML=[239,199,160,330].map(h=>`<button class="dot" data-h="${h}" style="background:hsl(${h} 85% 50%)" aria-label="Accent colour ${h}"></button>`).join('');
 $('#sw').onclick=e=>{const h=e.target.dataset.h;if(h){R.style.setProperty('--h',h);s('cv-h',h)}};
-$('#tm').onclick=()=>{const dark=R.dataset.theme?R.dataset.theme=='dark':matchMedia('(prefers-color-scheme: dark)').matches,t=dark?'light':'dark';R.dataset.theme=t;s('cv-t',t)}})();
+$('#tm').onclick=()=>{const t=R.dataset.theme=='light'?'dark':'light';R.dataset.theme=t;s('cv-t',t)}})();
+(()=>{const q=$('#q'),f=()=>{const v=q.value.trim().toLowerCase();document.querySelectorAll('.g').forEach(g=>{let n=0;g.querySelectorAll('.t').forEach(t=>{const k=T.find(x=>x.id==t.dataset.id),ok=!v||(k.n+' '+k.d).toLowerCase().includes(v);t.style.display=ok?'':'none';n+=ok});g.style.display=n?'':'none';g.previousElementSibling.style.display=n?'':'none'})};q.oninput=f;addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()=='k'){e.preventDefault();q.focus()}})})();
